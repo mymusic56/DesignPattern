@@ -1,5 +1,7 @@
 package com.zsj.designpattern.composite;
 
+import lombok.Getter;
+
 import javax.xml.soap.Node;
 import java.io.File;
 import java.util.ArrayList;
@@ -12,7 +14,7 @@ enum NodeType {
 
 class Test {
     public static void main(String[] args) {
-        String path = "D:\\workspace-Java\\my_project\\DesignPattern\\src\\main\\java\\com\\zsj\\designpattern\\demo";
+        String path = "D:\\Workspace-Java\\my_project\\DesignPattern\\src\\main\\java\\com\\zsj\\designpattern\\demo";
         File file = new File(path);
         System.out.println(file.getAbsolutePath());
         FileNode node = new FileNode(file.getAbsolutePath(), file.getName(), NodeType.DIR);
@@ -20,9 +22,14 @@ class Test {
         Test test = new Test();
         test.scanFileOne(node, file);
 
-        test.print(node);
+        test.printV2(node);
     }
 
+
+    /**
+     *
+     * @param node
+     */
     private void print(FileNode node) {
         for (FileNode n : node.getFileNodeList()) {
             System.out.println(n.getPath());
@@ -60,6 +67,7 @@ class Test {
 
 }
 
+@Getter
 public class FileNode {
     private FileNode parentNode = null;
 
@@ -106,33 +114,5 @@ public class FileNode {
      */
     private void sizeOfFiles() {
 
-    }
-
-    public FileNode getParentNode() {
-        return parentNode;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public NodeType getNodeType() {
-        return nodeType;
-    }
-
-    public List<FileNode> getFileNodeList() {
-        return fileNodeList;
-    }
-
-    public long getFileSize() {
-        return fileSize;
-    }
-
-    public long getFileCount() {
-        return fileCount;
     }
 }
