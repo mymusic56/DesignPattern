@@ -33,5 +33,40 @@ public class Test {
 
         System.out.println("val = " + val);
         System.out.println("val2 = " + val2);
+
+        threadSingletonTest();
+    }
+
+    /**
+     * 线程内单例模式
+     */
+    private static void threadSingletonTest(){
+        System.out.println("====================线程内单例模式====================");
+        new Thread() {
+            public void run() {
+                long threadId = Thread.currentThread().getId();
+                System.out.println("线程ID：" + threadId);
+                long id;
+
+                for (int i = 1; i <= 3; i++) {
+                    id = IdGeneratorThread.getInstance().getId();
+                    System.out.println("线程ID：" + threadId + ", i = " + i);
+                }
+            }
+        }.start();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                long threadId = Thread.currentThread().getId();
+                System.out.println("线程ID：" + threadId);
+                long id;
+
+                for (int i = 1; i <= 3; i++) {
+                    id = IdGeneratorThread.getInstance().getId();
+                    System.out.println("线程ID：" + threadId + ", i = " + i);
+                }
+            }
+        }).start();
     }
 }
