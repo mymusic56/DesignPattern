@@ -1,10 +1,20 @@
 package com.zsj.designpattern.composite;
 
+import com.zsj.designpattern.util.ArrayQueue;
+import com.zsj.designpattern.util.FileUtil;
 import lombok.Getter;
+import lombok.Setter;
 
 import javax.xml.soap.Node;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributeView;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 enum NodeType {
@@ -12,17 +22,32 @@ enum NodeType {
     DIR;
 }
 
+/**
+ * 导出有道云笔记生成索引，导入VNote里面
+ */
 class Test {
-    public static void main(String[] args) {
-        String path = "D:\\Workspace-Java\\my_project\\DesignPattern\\src\\main\\java\\com\\zsj\\designpattern\\demo";
+    public static void main(String[] args) throws Exception {
+        String path = "";
+
         File file = new File(path);
         System.out.println(file.getAbsolutePath());
         FileNode node = new FileNode(file.getAbsolutePath(), file.getName(), NodeType.DIR);
+        node.setCreatedTime(FileUtil.getCreatedTime(file));
+        node.setModifiedTime(new Date(file.lastModified()));
+        node.setAttachment_folder("_v_attachments");
+        node.setImage_folder("");
+        node.setRecycle_bin_folder("recycle_bin_folder");
 
         Test test = new Test();
         test.scanFileOne(node, file);
 
         test.printV2(node);
+
+        FileNodeResultIndex result = new FileNodeResultIndex();
+        ArrayQueue queue = result.getQueue();
+        queue.in(node);
+        result.setQueue(queue);
+        result.indexV2();
     }
 
 
@@ -56,18 +81,24 @@ class Test {
                 for (File f : files) {
                     if (f.isDirectory()) {
                         FileNode tmpNode = new FileNode(f.getAbsolutePath(), f.getName(), NodeType.DIR);
+                        tmpNode.setCreatedTime(FileUtil.getCreatedTime(f));
+                        tmpNode.setModifiedTime(new Date(f.lastModified()));
                         node.addNode(tmpNode);
                         scanFileOne(tmpNode, f);
+                    } else {
+                        FileNode tmpNode = new FileNode(f.getAbsolutePath(),f.getName(), NodeType.FILE);
+                        tmpNode.setCreatedTime(FileUtil.getCreatedTime(f));
+                        tmpNode.setModifiedTime(new Date(f.lastModified()));
+                        node.addNode(tmpNode);
                     }
-                    node.addNode(new FileNode(f.getAbsolutePath(),f.getName(), NodeType.FILE));
                 }
             }
         }
     }
-
 }
 
 @Getter
+@Setter
 public class FileNode {
     private FileNode parentNode = null;
 
@@ -80,6 +111,17 @@ public class FileNode {
     private long fileSize = 0L;
 
     private long fileCount = 0L;
+
+    private Date createdTime;
+
+    private Date modifiedTime;
+
+    //根目录才有该字段
+    private String image_folder = null;
+    //根目录才有该字段
+    private String attachment_folder = null;
+    //根目录才有该字段
+    private String recycle_bin_folder = null;
 
     //子节点
     private List<FileNode> fileNodeList = new ArrayList<>();
